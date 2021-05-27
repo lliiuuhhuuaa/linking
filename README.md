@@ -9,7 +9,7 @@
 - linux运行命令:
 
 ```shell
-nohup java -jar link-server.jar >logining.log &
+nohup java -jar linking-server.jar >logining.log &
 ```
 - 配置文件说明 application.properties
 
@@ -25,7 +25,7 @@ server.port=8000
 ## 客户端
 
 ```shell
-nohup java -jar link-client.jar >logining.log &
+nohup java -jar linking-client.jar >logining.log &
 ```
 
 - 配置说明
