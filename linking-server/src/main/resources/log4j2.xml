@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration debug="off" monitorInterval="1800">
+    <properties>
+        <property name="LOG_HOME">logFile/linking</property>
+        <property name="PROJECT">${sys:log.project:-other}</property>
+        <property name="FILE_NAME">log4j</property>
+        <property name="log.sql.level">info</property>
+    </properties>
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %l - %msg%n" />
+        </Console>
+        <RollingFile name="File_Error" fileName="${LOG_HOME}/error/${PROJECT}/${FILE_NAME}.log"
+            filePattern="${LOG_HOME}/error/${PROJECT}/${FILE_NAME}-%d{yyyy-MM-dd}.log">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %l - %msg%n" />
+            <Policies>
+                <TimeBasedTriggeringPolicy />
+            </Policies>
+        </RollingFile>
+        <RollingFile name="File_Warn" fileName="${LOG_HOME}/warn/${PROJECT}/${FILE_NAME}.log"
+            filePattern="${LOG_HOME}/warn/${PROJECT}/${FILE_NAME}-%d{yyyy-MM-dd}.log">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %l - %msg%n" />
+            <Policies>
+                <TimeBasedTriggeringPolicy />
+            </Policies>
+        </RollingFile>
+        <RollingFile name="File_Info" fileName="${LOG_HOME}/info/${PROJECT}/${FILE_NAME}.log"
+            filePattern="${LOG_HOME}/info/${PROJECT}/${FILE_NAME}-%d{yyyy-MM-dd}.log">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %l - %msg%n" />
+            <Policies>
+                <TimeBasedTriggeringPolicy />
+            </Policies>
+        </RollingFile>
+    </Appenders>
+    <Loggers>
+        <Root level="info">
+            <appender-ref ref="Console" level="info" />
+            <appender-ref ref="File_Error" level="error" />
+            <appender-ref ref="File_Warn" level="warn" />
+            <appender-ref ref="File_Info" level="info" />
+        </Root>
+    </Loggers>
+</Configuration>

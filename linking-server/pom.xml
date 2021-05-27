@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.lh</groupId>
+        <artifactId>linking</artifactId>
+        <version>1.0</version>
+    </parent>
+    <groupId>com.lh.linking</groupId>
+    <artifactId>linking-server</artifactId>
+    <version>1.0.1</version>
+    <name>linking-server</name>
+    <description>内网穿透服务端</description>
+    <dependencies>
+        <dependency>
+            <groupId>com.lh</groupId>
+            <artifactId>linking-common</artifactId>
+            <version>1.0.1</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <!-- 不打包依赖的jar配置-->
+                        <manifest>
+                            <!--设置添加path路径开关为true-->
+                            <addClasspath>true</addClasspath>
+                            <!--设置添加path路径-->
+                            <classpathPrefix>lib/</classpathPrefix>
+                            <!--启动类-->
+                            <mainClass>com.lh.linking.LinkingServerApplication</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
