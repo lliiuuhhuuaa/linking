@@ -11,6 +11,13 @@
 ```shell
 nohup java -jar linking-server.jar >logining.log &
 ```
+- 自定义监听端口启动:
+
+```shell
+nohup java -jar linking-server.jar server.port=1234 >logining.log &
+```
+
+
 - 配置文件说明 application.properties
 
 ```shell
@@ -24,8 +31,15 @@ server.port=8000
 
 ## 客户端
 
+- linux运行命令:
+
 ```shell
 nohup java -jar linking-client.jar >logining.log &
+```
+- 自定义服务器主机和端口启动:
+
+```shell
+nohup java -jar linking-client.jar server.host=192.20.30.12 server.port=1234 >logining.log &
 ```
 
 - 配置说明

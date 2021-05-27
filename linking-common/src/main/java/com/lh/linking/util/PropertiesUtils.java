@@ -57,4 +57,12 @@ public class PropertiesUtils{
     public static Integer getPropertyForInteger(String key) {
         return getPropertyForInteger(key,null);
     }
+    /**
+     * @do 覆盖配置
+     * @author liuhua
+     * @date 2021/5/27 下午9:54
+     */
+    public static void setProperty(String key, String value) {
+        properties.setProperty(key,value);
+    }
 }
