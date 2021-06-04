@@ -51,7 +51,10 @@ public class RemoteProxyHandler extends SimpleChannelInboundHandler {
     @Override
     public void channelInactive(ChannelHandlerContext ctx) {
         String channelId = ctx.channel().id().asLongText();
-        ServerConstant.USER_CLIENT_MAP.put(channelId, ctx);
+        ChannelHandlerContext remove = ServerConstant.USER_CLIENT_MAP.remove(channelId);
+        if(remove!=null){
+            remove.close();
+        }
     }
 
     @Override

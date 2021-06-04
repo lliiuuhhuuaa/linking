@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.lh</groupId>
         <artifactId>linking</artifactId>
-        <version>1.0</version>
+        <version>1.1</version>
     </parent>
     <artifactId>linking-common</artifactId>
     <version>1.0.1</version>

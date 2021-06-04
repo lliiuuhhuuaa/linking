@@ -1,6 +1,7 @@
 package com.lh.linking.util;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 /**
@@ -14,10 +15,13 @@ public class PropertiesUtils{
      */
     private static Properties properties = new Properties();
     static{
+        InputStream resourceAsStream = PropertiesUtils.class.getResourceAsStream("/application.properties");
         try {
-            properties.load(PropertiesUtils.class.getResourceAsStream("/application.properties"));
+            properties.load(resourceAsStream);
         } catch (IOException e) {
             e.printStackTrace();
+        }finally {
+            SystemUtil.closeStream(resourceAsStream);
         }
     }
 

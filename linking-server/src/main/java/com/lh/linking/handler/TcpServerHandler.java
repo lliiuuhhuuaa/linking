@@ -108,9 +108,7 @@ public class TcpServerHandler extends SimpleChannelInboundHandler<SocketMessage>
      */
     private void processData(SocketMessage socketMessage) {
         ChannelHandlerContext userCtx = ServerConstant.USER_CLIENT_MAP.get(socketMessage.getChannelId());
-        if (Objects.isNull(userCtx)) {
-            log.error("received intranet proxy client message，but the corresponding proxy server was not found! ");
-        } else {
+        if (Objects.nonNull(userCtx)) {
             userCtx.writeAndFlush(socketMessage.getData());
         }
     }
@@ -119,7 +117,7 @@ public class TcpServerHandler extends SimpleChannelInboundHandler<SocketMessage>
      * 断开,先关闭外网暴露的代理，再关闭连接的客户端
      */
     private void processDisconnected(SocketMessage message) {
-        ChannelHandlerContext userCtx = ServerConstant.USER_CLIENT_MAP.get(message.getChannelId());
+        ChannelHandlerContext userCtx = ServerConstant.USER_CLIENT_MAP.remove(message.getChannelId());
         if (Objects.nonNull(userCtx)) {
             userCtx.close();
         }

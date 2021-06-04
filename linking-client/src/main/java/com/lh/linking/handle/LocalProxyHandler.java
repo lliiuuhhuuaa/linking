@@ -8,7 +8,6 @@ import com.lh.linking.util.TcpClient;
 
 import java.util.Iterator;
 
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.extern.slf4j.Slf4j;
@@ -50,12 +49,17 @@ public class LocalProxyHandler extends SimpleChannelInboundHandler<Object> {
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) {
+        ChannelHandlerContext remove = ClientConstant.ID_SERVICE_CHANNEL_MAP.remove(remoteChannelId);
+        if(remove!=null) {
+            remove.close();
+        }
         ClientConstant.CHANNEL_MAP.values().forEach(intranetClients -> {
             Iterator<TcpClient> iterator = intranetClients.iterator();
             while (iterator.hasNext()) {
-                Channel channel = iterator.next().getChannel();
-                if (channel == ctx.channel()) {
+                TcpClient next = iterator.next();
+                if (next.getFuture().channel() == ctx.channel()) {
                     iterator.remove();
+                    next.close();
                 }
             }
         });

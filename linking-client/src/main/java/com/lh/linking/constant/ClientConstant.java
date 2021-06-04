@@ -12,6 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import lombok.Getter;
 import lombok.Setter;
@@ -39,20 +40,25 @@ public class ClientConstant {
     public static final ConcurrentHashMap<Channel, List<TcpClient>> CHANNEL_MAP = new ConcurrentHashMap<>();
 
     public static void addChannel(Channel channel, TcpClient target) {
-        List<TcpClient> channels = CHANNEL_MAP.get(channel);
-        if (Objects.isNull(channels)) {
-            channels = Collections.synchronizedList(new ArrayList<>(16));
-        }
-        channels.add(target);
+        List<TcpClient> tcpClients = CHANNEL_MAP.computeIfAbsent(channel, key -> new ArrayList<>());
+        tcpClients.add(target);
     }
-
     /**
      * 根据channel id，移除channel映射
      */
     public static void removeChannelByProxyClient(Channel channel, String channelId) {
         List<TcpClient> intranetClients = CHANNEL_MAP.get(channel);
         if (Objects.nonNull(intranetClients)) {
-            intranetClients.removeIf(intranetClient -> intranetClient.getChannel().id().asLongText().equals(channelId));
+            intranetClients.removeIf(intranetClient -> {
+                if(intranetClient.getFuture().channel().id().asLongText().equals(channelId)){
+                    intranetClient.close();
+                    return true;
+                 }
+                return false;
+            });
+        }
+        if(intranetClients.isEmpty()){
+            CHANNEL_MAP.remove(channel);
         }
     }
 }

@@ -14,11 +14,12 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
-import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
+import io.netty.util.concurrent.DefaultThreadFactory;
+import io.netty.util.concurrent.ExecutorServiceFactory;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -30,24 +31,29 @@ import lombok.extern.slf4j.Slf4j;
 public class SocketClient {
     private static SocketChannel socketChannel = null;
     private static ClientHandler clientHandler = null;
+    private static NioEventLoopGroup nioEventLoopGroup = null;
+    private static ChannelPipeline pipeline = null;
     /**
      * @do 开始服务
      * @author liuhua
      * @date 2021/4/29 下午9:57
      */
     public static void start() {
-        EventLoopGroup workerGroup = new NioEventLoopGroup();
+        close();
+        nioEventLoopGroup = new NioEventLoopGroup();
         try {
             Bootstrap b = new Bootstrap(); // (1)
-            b.group(workerGroup); // (2)
+            b.group(nioEventLoopGroup); // (2)
             b.channel(NioSocketChannel.class); // (3)
+                b.option(ChannelOption.SO_SNDBUF, 2048*1024);
+                    b.option(ChannelOption.SO_RCVBUF, 2048*1024);
             b.option(ChannelOption.TCP_NODELAY, true); // (4)
             b.option(ChannelOption.SO_KEEPALIVE, true); // (4)
             b.handler(new ChannelInitializer<SocketChannel>() {
                 @Override
                 public void initChannel(SocketChannel channel) {
                     socketChannel = channel;
-                    ChannelPipeline pipeline = channel.pipeline();
+                    pipeline = channel.pipeline();
                     pipeline.addLast(new IdleStateHandler(20, 10, 0));
                     pipeline.addLast(new MessageDecoder());
                     pipeline.addLast(new MessageEncoder());
@@ -74,14 +80,28 @@ public class SocketClient {
             //重连
             reconnect();
         } finally {
-            try {
-                workerGroup.shutdownGracefully().sync();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            close();
         }
     }
-
+    /**
+     * @do 关闭处理
+     * @author liuhua
+     * @date 2021/6/1 下午8:03
+     */
+    private static void close(){
+        if(nioEventLoopGroup!=null){
+            nioEventLoopGroup.shutdownGracefully();
+        }
+        if(socketChannel!=null){
+            socketChannel.close();
+        }
+        if(clientHandler!=null){
+            clientHandler.close();
+        }
+        if(pipeline!=null){
+            pipeline.close();
+        }
+    }
     /**
      * 重连
      */

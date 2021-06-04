@@ -118,7 +118,7 @@ public class ClientHandler extends SimpleChannelInboundHandler<SocketMessage> {
         } else if (socketMessage.getCode() == SocketCodeEnum.DATA) {
             processData(ctx,socketMessage,0);
         } else if (socketMessage.getCode() == SocketCodeEnum.DISCONNECTED) {
-            processDisconnected(ctx.channel(), socketMessage);
+            processDisconnected(ctx, socketMessage);
         }
 
     }
@@ -177,16 +177,20 @@ public class ClientHandler extends SimpleChannelInboundHandler<SocketMessage> {
             channel.writeAndFlush(message);
             return;
         }
+        TcpClient tcpClient = null;
         try {
-            TcpClient tcpClient = new TcpClient().connect(proxyConfig.getHost(),proxyConfig.getPort(), ctx, channelId);
+            tcpClient = new TcpClient().connect(proxyConfig.getHost(),proxyConfig.getPort(), ctx, channelId);
             ClientConstant.addChannel(channel, tcpClient);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(),e);
             SocketMessage message = new SocketMessage();
             message.setMsg(e.getMessage());
             message.setCode(SocketCodeEnum.DISCONNECTED);
             message.setChannelId(socketMessage.getChannelId());
             channel.writeAndFlush(message);
+            if(tcpClient!=null){
+                tcpClient.close();
+            }
         }
     }
 
@@ -216,12 +220,13 @@ public class ClientHandler extends SimpleChannelInboundHandler<SocketMessage> {
     /**
      * 与代理服务端连接的用户客户端断开连接，处理资源，以及断开内网代理客户端
      */
-    private void processDisconnected(Channel channel, SocketMessage message) {
-        ChannelHandlerContext context = ClientConstant.ID_SERVICE_CHANNEL_MAP.get(message.getChannelId());
+    private void processDisconnected(ChannelHandlerContext ctx, SocketMessage message) {
+        ChannelHandlerContext context = ClientConstant.ID_SERVICE_CHANNEL_MAP.remove(message.getChannelId());
         if (Objects.nonNull(context)) {
             context.close();
-            ClientConstant.removeChannelByProxyClient(channel, message.getChannelId());
+            ClientConstant.removeChannelByProxyClient(ctx.channel(), message.getChannelId());
         }
+        ctx.close();
     }
 
 
@@ -236,6 +241,15 @@ public class ClientHandler extends SimpleChannelInboundHandler<SocketMessage> {
             }
         } else {
             super.userEventTriggered(ctx, evt);
+        }
+    }
+
+    /**
+     * 关闭
+     */
+    public void close(){
+        if(channelHandlerContext!=null) {
+            channelHandlerContext.close();
         }
     }
 }

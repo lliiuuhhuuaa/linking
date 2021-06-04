@@ -16,7 +16,6 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
-import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -42,6 +41,8 @@ public class SocketServer {
             b.group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
                     .option(ChannelOption.SO_BACKLOG, 2048)
+                        .option(ChannelOption.SO_SNDBUF, 2048*1024)
+                    .option(ChannelOption.SO_RCVBUF, 2048*1024)
                     .childOption(ChannelOption.SO_KEEPALIVE, true)//维持连接的活跃，清除死连接
                     .childOption(ChannelOption.TCP_NODELAY, true)//关闭延迟发送
                     .childHandler(new ChannelInitializer<>() {
@@ -49,7 +50,6 @@ public class SocketServer {
                         protected void initChannel(Channel channel) {
                             ChannelPipeline pipeline = channel.pipeline();
                             pipeline.addLast(new IdleStateHandler(20, 10, 0, TimeUnit.SECONDS));
-                            pipeline.addLast("TSHandler", new GlobalTrafficShapingHandler(new NioEventLoopGroup(), 100 * 1024 * 1024, 100 * 1024 * 1024));
                             pipeline.addLast("decode",new MessageDecoder());
                             pipeline.addLast("encode",new MessageEncoder());
                             pipeline.addLast("businessHandler", new TcpServerHandler());
