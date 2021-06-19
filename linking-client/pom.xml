@@ -5,18 +5,17 @@
     <parent>
         <groupId>com.lh</groupId>
         <artifactId>linking</artifactId>
-        <version>1.1</version>
+        <version>1.2</version>
     </parent>
     <groupId>com.lh.linking</groupId>
     <artifactId>linking-client</artifactId>
-    <version>1.0.1</version>
     <name>linking-client</name>
     <description>内网穿透客户端</description>
     <dependencies>
         <dependency>
             <groupId>com.lh</groupId>
             <artifactId>linking-common</artifactId>
-            <version>1.0.1</version>
+            <version>${app.version}</version>
         </dependency>
     </dependencies>
     <build>

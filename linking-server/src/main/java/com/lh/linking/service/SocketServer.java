@@ -1,5 +1,6 @@
 package com.lh.linking.service;
 
+import com.lh.linking.constant.ServerConstant;
 import com.lh.linking.handle.MessageDecoder;
 import com.lh.linking.handle.MessageEncoder;
 import com.lh.linking.handler.TcpServerHandler;
@@ -31,14 +32,11 @@ public class SocketServer {
      * @date 2021/4/29 下午9:57
      */
     public void start(int port) {
-        // 创建线程池
-        EventLoopGroup bossGroup = new NioEventLoopGroup();
-        EventLoopGroup workerGroup = new NioEventLoopGroup();
         try {
             //创建启动类
             ServerBootstrap b = new ServerBootstrap();
             //配置各组件
-            b.group(bossGroup, workerGroup)
+            b.group(ServerConstant.PARENT_GROUP,ServerConstant.CHILD_GROUP)
                     .channel(NioServerSocketChannel.class)
                     .option(ChannelOption.SO_BACKLOG, 2048)
                         .option(ChannelOption.SO_SNDBUF, 2048*1024)
@@ -67,16 +65,6 @@ public class SocketServer {
         } catch (Exception e) {
             e.printStackTrace();
             log.error("socket服务异常:,{}", e.getMessage());
-        } finally {
-            try {
-                bossGroup.shutdownGracefully().sync();
-            } catch (Exception e) {
-            }
-            try {
-                workerGroup.shutdownGracefully().sync();
-            } catch (Exception e) {
-
-            }
         }
     }
 }

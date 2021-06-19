@@ -1,15 +1,13 @@
 package com.lh.linking.util;
 
+import com.lh.linking.constant.ClientConstant;
 import com.lh.linking.handle.LocalProxyHandler;
 
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
-import io.netty.channel.ChannelPipeline;
-import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.bytes.ByteArrayDecoder;
@@ -23,7 +21,6 @@ import lombok.extern.slf4j.Slf4j;
 @Getter
 @Slf4j
 public class TcpClient {
-    private NioEventLoopGroup nioEventLoopGroup = new NioEventLoopGroup();
     private ChannelFuture future = null;
     /**
      * 开启内网代理客户端
@@ -36,7 +33,7 @@ public class TcpClient {
     public TcpClient connect(String host, int port, ChannelHandlerContext serverChannel, String channelId) throws InterruptedException {
         try {
             Bootstrap b = new Bootstrap();
-            b.group(nioEventLoopGroup)
+            b.group(ClientConstant.nioEventLoopGroup)
                     .channel(NioSocketChannel.class)
                     .option(ChannelOption.TCP_NODELAY, true) // (4)
                     .option(ChannelOption.SO_KEEPALIVE, true)
@@ -67,8 +64,6 @@ public class TcpClient {
      * 关闭
      */
     public void close(){
-        if(nioEventLoopGroup!=null) {
-            nioEventLoopGroup.shutdownGracefully();
-        }
+
     }
 }

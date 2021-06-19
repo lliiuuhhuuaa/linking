@@ -31,6 +31,8 @@ public final class ServerConstant {
      * 所有已开启的代理服务端
      */
     public static final List<TcpServer> PROXY_SERVER_LIST = Collections.synchronizedList(new ArrayList<>());
+    public static final EventLoopGroup PARENT_GROUP = new NioEventLoopGroup();
+    public static final EventLoopGroup CHILD_GROUP = new NioEventLoopGroup();
 
     /**
      * 判断当前端口的代理服务端是否存在且存活

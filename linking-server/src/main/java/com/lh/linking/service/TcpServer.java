@@ -1,5 +1,6 @@
 package com.lh.linking.service;
 
+import com.lh.linking.constant.ServerConstant;
 import com.lh.linking.handler.RemoteProxyHandler;
 
 import io.netty.bootstrap.ServerBootstrap;
@@ -36,7 +37,7 @@ public class TcpServer {
         this.port = port;
         this.initializer = new TcpServerInitializer(clientCtx,port);
         ServerBootstrap b = new ServerBootstrap();
-        b.group(new NioEventLoopGroup(), new NioEventLoopGroup())
+        b.group(ServerConstant.PARENT_GROUP,ServerConstant.CHILD_GROUP)
                 .channel(NioServerSocketChannel.class)
                 .childHandler(initializer)
                 .childOption(ChannelOption.SO_KEEPALIVE, true);

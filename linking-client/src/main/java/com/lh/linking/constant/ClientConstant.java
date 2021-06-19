@@ -26,7 +26,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class ClientConstant {
-
+    public static NioEventLoopGroup nioEventLoopGroup = new NioEventLoopGroup();
     /**
      * key 与外网代理服务端连接的channelid
      * value 连接到内网开启的服务端的客户端channel
