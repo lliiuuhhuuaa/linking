@@ -4,6 +4,7 @@ import com.lh.linking.constant.ClientConstant;
 import com.lh.linking.handle.LocalProxyHandler;
 
 import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
@@ -30,7 +31,7 @@ public class TcpClient {
      * @param channelId     外网代理服务端的channel id
      * @return 内网代理客户端channel
      */
-    public TcpClient connect(String host, int port, ChannelHandlerContext serverChannel, String channelId) throws InterruptedException {
+    public TcpClient connect(String host, int port, ChannelHandlerContext serverChannel, String channelId) {
         try {
             Bootstrap b = new Bootstrap();
             b.group(ClientConstant.nioEventLoopGroup)
@@ -64,6 +65,30 @@ public class TcpClient {
      * 关闭
      */
     public void close(){
+        if(future!=null){
+            close(future.channel());
+        }
+    }
+    /**
+     * @do 关闭
+     * @author liuhua
+     * @date 2022/4/16 21:35
+     */
+    public static void close(Channel channel) {
+        try {
+            channel.deregister();
+        }catch (Exception e){
 
+        }
+        try {
+            channel.disconnect();
+        }catch (Exception e){
+
+        }
+        try {
+            channel.close();
+        }catch (Exception e){
+
+        }
     }
 }

@@ -3,6 +3,7 @@ package com.lh.linking.handler;
 import com.lh.linking.constant.ServerConstant;
 import com.lh.linking.entity.SocketMessage;
 import com.lh.linking.enums.SocketCodeEnum;
+import com.lh.linking.util.ConnectUtils;
 
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -14,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 @Getter
 @Setter
 @Slf4j
-@ChannelHandler.Sharable
 public class RemoteProxyHandler extends SimpleChannelInboundHandler {
     private ChannelHandlerContext clientCtx;
     private final int port;
@@ -47,19 +47,21 @@ public class RemoteProxyHandler extends SimpleChannelInboundHandler {
         message.setChannelId(ctx.channel().id().asLongText());
         message.setData(data);
         clientCtx.writeAndFlush(message);
+        data = null;
+        msg = null;
     }
     @Override
     public void channelInactive(ChannelHandlerContext ctx) {
         String channelId = ctx.channel().id().asLongText();
         ChannelHandlerContext remove = ServerConstant.USER_CLIENT_MAP.remove(channelId);
         if(remove!=null){
-            remove.close();
+            ConnectUtils.close(remove);
         }
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        ctx.close();
+        ConnectUtils.close(ctx);
     }
 
 }

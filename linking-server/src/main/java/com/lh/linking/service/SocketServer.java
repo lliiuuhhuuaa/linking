@@ -63,7 +63,6 @@ public class SocketServer {
             });
             sync.channel().closeFuture().sync();
         } catch (Exception e) {
-            e.printStackTrace();
             log.error("socket服务异常:,{}", e.getMessage());
         }
     }

@@ -40,7 +40,7 @@ public class ClientHandler extends SimpleChannelInboundHandler<SocketMessage> {
     /**
      * 默认重新拉起客户端的起始秒数
      */
-    private static final int DEFAULT_TRY_SECONDS = 5;
+    private final int DEFAULT_TRY_SECONDS = 5;
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
         this.channelHandlerContext = ctx;
@@ -106,7 +106,7 @@ public class ClientHandler extends SimpleChannelInboundHandler<SocketMessage> {
     @Override
     public void messageReceived(ChannelHandlerContext ctx, SocketMessage socketMessage) {
         if (socketMessage.getCode() == SocketCodeEnum.KEEPALIVE) {
-            System.out.println("心跳");
+            log.info("心跳");
             return;
         }
         if (socketMessage.getCode() == SocketCodeEnum.REGISTER_OK||socketMessage.getCode() == SocketCodeEnum.REGISTER_ERROR) {
@@ -146,7 +146,7 @@ public class ClientHandler extends SimpleChannelInboundHandler<SocketMessage> {
      */
     private void processRegisterResult(SocketMessage message) {
         if (SocketCodeEnum.REGISTER_OK.equals(message.getCode())) {
-            System.out.println(String.format("代理服务[%d]注册成功",message.getPort()));
+            System.out.printf("代理服务[%d]注册成功%n",message.getPort());
         } else {
             log.error("代理服务[{}]注册失败:{}",message.getPort(),message.getMsg());
             //System.exit(0);
@@ -156,7 +156,7 @@ public class ClientHandler extends SimpleChannelInboundHandler<SocketMessage> {
      * 处理在服务端取消注册结果
      */
     private void processUnRegisterResult(SocketMessage message) {
-        System.out.println(String.format("代理服务[%d]已取消注册",message.getPort()));
+        System.out.printf("代理服务[%d]已取消注册%n",message.getPort());
     }
 
 
@@ -223,10 +223,10 @@ public class ClientHandler extends SimpleChannelInboundHandler<SocketMessage> {
     private void processDisconnected(ChannelHandlerContext ctx, SocketMessage message) {
         ChannelHandlerContext context = ClientConstant.ID_SERVICE_CHANNEL_MAP.remove(message.getChannelId());
         if (Objects.nonNull(context)) {
-            context.close();
+            close(context);
             ClientConstant.removeChannelByProxyClient(ctx.channel(), message.getChannelId());
         }
-        ctx.close();
+        close(ctx);
     }
 
 
@@ -249,7 +249,29 @@ public class ClientHandler extends SimpleChannelInboundHandler<SocketMessage> {
      */
     public void close(){
         if(channelHandlerContext!=null) {
-            channelHandlerContext.close();
+            close(channelHandlerContext);
+        }
+    }
+    /**
+     * @do 关闭
+     * @author liuhua
+     * @date 2022/4/16 21:35
+     */
+    public void close(ChannelHandlerContext context) {
+        try {
+            context.deregister();
+        }catch (Exception e){
+
+        }
+        try {
+            context.disconnect();
+        }catch (Exception e){
+
+        }
+        try {
+            context.close();
+        }catch (Exception e){
+
         }
     }
 }

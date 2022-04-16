@@ -20,6 +20,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.socket.nio.NioSocketChannel;
 
@@ -179,5 +180,49 @@ public class ConnectUtils {
     public static int getPort(ChannelHandlerContext channelHandlerContext) {
         NioSocketChannel channel = (NioSocketChannel) channelHandlerContext.channel();
         return channel.localAddress().getPort();
+    }
+    /**
+     * @do 关闭
+     * @author liuhua
+     * @date 2022/4/16 21:35
+     */
+    public static void close(ChannelHandlerContext context) {
+        try {
+            context.deregister();
+        }catch (Exception e){
+
+        }
+        try {
+            context.disconnect();
+        }catch (Exception e){
+
+        }
+        try {
+            context.close();
+        }catch (Exception e){
+
+        }
+    }
+    /**
+     * @do 关闭
+     * @author liuhua
+     * @date 2022/4/16 21:35
+     */
+    public static void close(Channel channel) {
+        try {
+            channel.deregister();
+        }catch (Exception e){
+
+        }
+        try {
+            channel.disconnect();
+        }catch (Exception e){
+
+        }
+        try {
+            channel.close();
+        }catch (Exception e){
+
+        }
     }
 }

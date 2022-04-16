@@ -39,10 +39,9 @@ public class LocalProxyHandler extends SimpleChannelInboundHandler<Object> {
 
     @Override
     public void messageReceived(ChannelHandlerContext ctx, Object msg) {
-        byte[] data = (byte[]) msg;
         SocketMessage message = new SocketMessage();
         message.setCode(SocketCodeEnum.DATA);
-        message.setData(data);
+        message.setData((byte[]) msg);
         message.setChannelId(remoteChannelId);
         serverChannel.writeAndFlush(message);
     }
@@ -51,7 +50,7 @@ public class LocalProxyHandler extends SimpleChannelInboundHandler<Object> {
     public void channelInactive(ChannelHandlerContext ctx) {
         ChannelHandlerContext remove = ClientConstant.ID_SERVICE_CHANNEL_MAP.remove(remoteChannelId);
         if(remove!=null) {
-            remove.close();
+            close(remove);
         }
         ClientConstant.CHANNEL_MAP.values().forEach(intranetClients -> {
             Iterator<TcpClient> iterator = intranetClients.iterator();
@@ -63,5 +62,27 @@ public class LocalProxyHandler extends SimpleChannelInboundHandler<Object> {
                 }
             }
         });
+    }
+    /**
+     * @do 关闭
+     * @author liuhua
+     * @date 2022/4/16 21:35
+     */
+    public void close(ChannelHandlerContext context) {
+        try {
+            context.deregister();
+        }catch (Exception e){
+
+        }
+        try {
+            context.disconnect();
+        }catch (Exception e){
+
+        }
+        try {
+            context.close();
+        }catch (Exception e){
+
+        }
     }
 }

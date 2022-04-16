@@ -18,8 +18,6 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
-import io.netty.util.concurrent.DefaultThreadFactory;
-import io.netty.util.concurrent.ExecutorServiceFactory;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -29,16 +27,16 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class SocketClient {
-    private static SocketChannel socketChannel = null;
+    private SocketChannel socketChannel = null;
     private static ClientHandler clientHandler = null;
-    private static NioEventLoopGroup nioEventLoopGroup = null;
-    private static ChannelPipeline pipeline = null;
+    private NioEventLoopGroup nioEventLoopGroup = null;
+    private ChannelPipeline pipeline = null;
     /**
      * @do 开始服务
      * @author liuhua
      * @date 2021/4/29 下午9:57
      */
-    public static void start() {
+    public void start() {
         close();
         nioEventLoopGroup = new NioEventLoopGroup();
         try {
@@ -65,7 +63,7 @@ public class SocketClient {
             ChannelFuture sync = b.connect(PropertiesUtils.getProperty("server.host"),port).sync(); // (5)
             sync.addListener(future -> {
                 if (future.isSuccess()) {
-                    System.out.println(String.format("服务端口[%d]连接成功",port));
+                    System.out.printf("服务端口[%d]连接成功%n",port);
                     clientHandler.registerProxy(ProxyConfigUtils.getConfigs(), true);
                 } else {
                     log.error("服务端口[{}]连接失败",port);
@@ -88,7 +86,7 @@ public class SocketClient {
      * @author liuhua
      * @date 2021/6/1 下午8:03
      */
-    private static void close(){
+    private void close(){
         if(nioEventLoopGroup!=null){
             nioEventLoopGroup.shutdownGracefully();
         }
@@ -105,8 +103,8 @@ public class SocketClient {
     /**
      * 重连
      */
-    private static boolean reconnecting = false;
-    private static void reconnect(){
+    private boolean reconnecting = false;
+    private void reconnect(){
         if(reconnecting){
             return;
         }
@@ -116,7 +114,7 @@ public class SocketClient {
             public void run() {
                 System.out.println("服务断开,准备重新连接...");
                 reconnecting = false;
-                SocketClient.start();
+                start();
             }
         },2000);
     }
@@ -126,7 +124,7 @@ public class SocketClient {
      * @date 2021/5/10 下午1:14
      */
     public static void reloadProxy(){
-        if(socketChannel!=null) {
+        if(clientHandler!=null) {
             clientHandler.registerProxy(ProxyConfigUtils.getConfigs(), true);
         }
     }

@@ -7,7 +7,7 @@ public class LinkingClientApplication {
 
     public static void main(String[] args) {
         loadParam(args);
-        SocketClient.start();
+        new SocketClient().start();
     }
     /**
      * @do 加载启动参数

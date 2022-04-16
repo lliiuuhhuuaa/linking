@@ -4,6 +4,7 @@ import com.lh.linking.constant.ServerConstant;
 import com.lh.linking.entity.SocketMessage;
 import com.lh.linking.enums.SocketCodeEnum;
 import com.lh.linking.service.TcpServer;
+import com.lh.linking.util.ConnectUtils;
 import com.lh.linking.util.PropertiesUtils;
 import com.lh.linking.util.SecureUtils;
 
@@ -26,14 +27,13 @@ import lombok.extern.slf4j.Slf4j;
  * tcp handler
  */
 @Slf4j
-@ChannelHandler.Sharable
 public class TcpServerHandler extends SimpleChannelInboundHandler<SocketMessage> {
     private List<String> authChannel = new ArrayList<>();
     /**
      * 默认读超时上限
      */
-    private static final byte DEFAULT_RECONNECTION_LIMIT = 5;
-    private static final Map<ChannelHandlerContext, Integer> DEFAULT_COUNT = new ConcurrentHashMap<>();
+    private final byte DEFAULT_RECONNECTION_LIMIT = 5;
+    private final Map<ChannelHandlerContext, Integer> DEFAULT_COUNT = new ConcurrentHashMap<>();
 
     @Override
     public void messageReceived(ChannelHandlerContext ctx, SocketMessage socketMessage) {
@@ -47,7 +47,7 @@ public class TcpServerHandler extends SimpleChannelInboundHandler<SocketMessage>
             return;
         }
         if ((codeEnum == SocketCodeEnum.REGISTER || codeEnum == SocketCodeEnum.UNREGISTER) && !authChannel.contains(channelId)) {
-            ctx.close();
+            ConnectUtils.close(ctx);
             return;
         }
         //客户端注册
@@ -94,7 +94,7 @@ public class TcpServerHandler extends SimpleChannelInboundHandler<SocketMessage>
         for (int i = ServerConstant.PROXY_SERVER_LIST.size() - 1; i >= 0; i--) {
             if (ServerConstant.PROXY_SERVER_LIST.get(i).getPort() == socketMessage.getPort()) {
                 TcpServer tcpServer = ServerConstant.PROXY_SERVER_LIST.remove(i);
-                tcpServer.getChannel().close();
+                ConnectUtils.close(tcpServer.getChannel());
                 log.info("代理端口{}取消注册成功", socketMessage.getPort());
                 socketMessage.setCode(SocketCodeEnum.UNREGISTER_OK);
                 ctx.writeAndFlush(socketMessage);
@@ -119,16 +119,14 @@ public class TcpServerHandler extends SimpleChannelInboundHandler<SocketMessage>
     private void processDisconnected(SocketMessage message) {
         ChannelHandlerContext userCtx = ServerConstant.USER_CLIENT_MAP.remove(message.getChannelId());
         if (Objects.nonNull(userCtx)) {
-            userCtx.close();
+            ConnectUtils.close(userCtx);
         }
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) {
         log.error("the client({}) is disconnected", ctx.channel().remoteAddress());
-        if (ctx.channel().isActive()) {
-            ctx.close();
-        }
+        ConnectUtils.close(ctx);
     }
 
     @Override
@@ -144,14 +142,14 @@ public class TcpServerHandler extends SimpleChannelInboundHandler<SocketMessage>
                 if (count > DEFAULT_RECONNECTION_LIMIT) {
                     DEFAULT_COUNT.remove(ctx);
                     log.error("read idle  will loss connection. retryNum:{}", count);
-                    ctx.close();
+                    ConnectUtils.close(ctx);
                 }
             }
         } else {
             try {
                 super.userEventTriggered(ctx, evt);
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error(e.getMessage());
             }
         }
     }
